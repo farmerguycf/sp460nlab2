@@ -3,10 +3,10 @@
     in this comment.
     REFER TO THE SUBMISSION INSTRUCTION FOR DETAILS
 
-    Name 1: Full name of the first partner 
-    Name 2: Full name of the second partner
-    UTEID 1: UT EID of the first partner
-    UTEID 2: UT EID of the second partner
+    Name 1: guy farmer
+    Name 2: michael hilborn
+    UTEID 1: gcf375
+    UTEID 2: mth2433
 */
 
 /***************************************************************/
@@ -407,7 +407,10 @@ int main(int argc, char *argv[]) {
 /***************************************************************/
 
 
-
+void decode(int instruction);
+void execute(int instruction);
+void update(int instruction);
+int dr, sr1, sr2, steering_bit, imm5, off9, baser, off11, off6, amount4;
 void process_instruction(){
   /*  function: process_instruction
    *  
@@ -416,6 +419,72 @@ void process_instruction(){
    *       -Decode 
    *       -Execute
    *       -Update NEXT_LATCHES
-   */     
+   */  
+
+
+  // fetch 
+  int instruction = MEMORY[CURRENT_LATCHES.PC/2][0] | (MEMORY[CURRENT_LATCHES.PC/2][1]<<8); 
+  decode(instruction);
+  execute(instruction);
+  update(instruction);
 
 }
+
+void decode(int instruction){
+  int opcode = (instruction & 0xf000)>>12;
+  // add 
+  if(opcode == 1){
+    dr = (instruction & 0x0e00) >> 9;
+    sr1 = (instruction & 0x01c0) >>6;
+    steering_bit = (instruction & 0x0020) >>5;
+    sr2 = instruction & 0x0007;
+    imm5 = instruction & 0x001f;
+  }
+  else if(opcode == 2){
+
+  }
+  else if(opcode == 3){
+    
+  }
+  else if(opcode == 4){
+    
+  }
+  else if(opcode == 5){
+    
+  }
+  else if(opcode == 6){
+    
+  }
+  else if(opcode == 7){
+    
+  }
+  else if(opcode == 8){
+    
+  }
+  else if(opcode == 9){
+    
+  }
+  else if(opcode == 10){
+    
+  }
+  else if(opcode == 11){
+    
+  }
+  else if(opcode == 12){
+    
+  }
+  else if(opcode == 13){
+    
+  }
+  else if(opcode == 14){
+    
+  }
+  else if(opcode == 15){
+    
+  }
+  else if(opcode == 0){
+    
+  }
+}
+void execute(int instruction){};
+void update(int instruction){};
