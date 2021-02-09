@@ -410,7 +410,8 @@ int main(int argc, char *argv[]) {
 void decode(int instruction);
 void execute(int instruction);
 void update(int instruction);
-int dr, sr1, sr2, steering_bit, imm5, off9, baser, off11, off6, amount4, nzp_bits, trap_vector;
+int sign_extend(int offset, int size);
+int opcode,dr, sr1, sr2, steering_bit, imm5, off9, baser, off11, off6, amount4, nzp_bits, trap_vector;
 void process_instruction(){
   /*  function: process_instruction
    *  
@@ -424,6 +425,7 @@ void process_instruction(){
 
   // fetch 
   int instruction = MEMORY[CURRENT_LATCHES.PC/2][0] | (MEMORY[CURRENT_LATCHES.PC/2][1]<<8); 
+  opcode = (instruction & 0xf000)>>12;
   decode(instruction);
   execute(instruction);
   update(instruction);
@@ -431,7 +433,7 @@ void process_instruction(){
 }
 
 void decode(int instruction){
-  int opcode = (instruction & 0xf000)>>12;
+  
   // add 
   if(opcode == 1){
     dr = (instruction & 0x0e00) >> 9;
@@ -530,7 +532,7 @@ void decode(int instruction){
     if(instruction & 0x0100){
       off9 = off9 | 0xFE00;
     }
-  }
+  }// trap
   else if(opcode == 15){
     trap_vector = instruction & 0x00FF;
   }//branch instruction
@@ -542,5 +544,74 @@ void decode(int instruction){
     }
   }
 }
-void execute(int instruction){};
+void execute(int instruction){
+  // branch
+  if(opcode == 0){
+    int nzp = (CURRENT_LATCHES.N<<2) | (CURRENT_LATCHES.Z<<1) | CURRENT_LATCHES.P;
+    if(nzp == nzp_bits){
+      NEXT_LATCHES.PC = CURRENT_LATCHES.PC + (sign_extend(off9,9)<<1);
+    }
+    else NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;
+  } // add 
+  else if(opcode == 1){
+    if(!steering_bit){
+      NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] + CURRENT_LATCHES.REGS[sr2];
+    }
+    else NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] + sign_extend(imm5, 5);
+  }// ldb
+  else if(opcode == 2){
+    NEXT_LATCHES.REGS[dr] = MEMORY[(CURRENT_LATCHES.REGS[baser] + sign_extend(off6,6))/2][(CURRENT_LATCHES.REGS[baser] + sign_extend(off6,6))%2];
+  }// stb
+  else if(opcode == 3){
+    MEMORY[(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))/2][(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))%2] = (CURRENT_LATCHES.REGS[sr1] & 0x00ff);
+  }
+  else if(opcode == 4){
+    
+  }
+  else if(opcode == 5){
+    if(!steering_bit){
+      NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] & CURRENT_LATCHES.REGS[sr2];
+    }
+    else NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] & sign_extend(imm5, 5); 
+  }
+  else if(opcode == 6){
+    
+  }
+  else if(opcode == 7){
+    
+  }
+  else if(opcode == 8){
+    
+  }
+  else if(opcode == 9){
+    if(!steering_bit){
+      NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] ^ CURRENT_LATCHES.REGS[sr2];
+    }
+    else NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] ^ sign_extend(imm5, 5);
+  }
+  else if(opcode == 10){
+    
+  }
+  else if(opcode == 11){
+    
+  }
+  else if(opcode == 12){
+    
+  }
+  else if(opcode == 13){
+    
+  }
+  else if(opcode == 14){
+    
+  }
+  else if(opcode == 15){
+    
+  }
+};
 void update(int instruction){};
+int sign_extend(int offset, int size){
+  if(offset>>size){
+    return offset | (0xffff<<(16-size));
+  }
+  else return offset;
+}
