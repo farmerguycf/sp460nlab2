@@ -410,7 +410,7 @@ int main(int argc, char *argv[]) {
 void decode(int instruction);
 void execute(int instruction);
 void update(int instruction);
-int dr, sr1, sr2, steering_bit, imm5, off9, baser, off11, off6, amount4;
+int dr, sr1, sr2, steering_bit, imm5, off9, baser, off11, off6, amount4, nzp_bits, trap_vector;
 void process_instruction(){
   /*  function: process_instruction
    *  
@@ -439,51 +439,107 @@ void decode(int instruction){
     steering_bit = (instruction & 0x0020) >>5;
     sr2 = instruction & 0x0007;
     imm5 = instruction & 0x001f;
-  }
+    if(instruction & 0x0010){
+      imm5 = imm5 | 0xffe0;
+    }
+  }//ldb instruction
   else if(opcode == 2){
-
-  }
+    dr = (instruction & 0x0e00)>>9;
+    baser = (instruction & 0x01c0) >>6;
+    off6 = (instruction & 0x003F);
+    if((instruction & 0x0020)){
+      off6 = off6 | 0xffc0;
+    }
+  }//stb instruction
   else if(opcode == 3){
-    
-  }
+    sr1 = (instruction & 0x0e00)>>9;
+    baser = (instruction & 0x01c0) >>6;
+    off6 = (instruction & 0x003F);
+    if((instruction & 0x0020)){
+      off6 = off6 | 0xffc0;
+    }
+  }//JSR Instruction
   else if(opcode == 4){
-    
-  }
+    steering_bit = (instruction & 0x0800)>>11;
+    if(steering_bit){
+      off11 = (instruction & 0x07FF);
+      if(instruction & 0x0400){
+        off11 = off11 | 0xF800;
+      }
+    }else{
+      baser = (instruction & 0x01C0)>>6;
+    }
+  }//And Instruction
   else if(opcode == 5){
-    
-  }
+    dr = (instruction & 0x0e00) >> 9;
+    sr1 = (instruction & 0x01c0) >>6;
+    steering_bit = (instruction & 0x0020) >>5;
+    sr2 = instruction & 0x0007;
+    imm5 = instruction & 0x001f;
+    if(instruction & 0x0010){
+      imm5 = imm5 | 0xffe0;
+    }
+  }//ldw instruction
   else if(opcode == 6){
-    
-  }
+    dr = (instruction & 0x0e00)>>9;
+    baser = (instruction & 0x01c0) >>6;
+    off6 = (instruction & 0x003F);
+    if((instruction & 0x0020)){
+      off6 = off6 | 0xffc0;
+    }
+  }//stw instruction
   else if(opcode == 7){
-    
-  }
+    sr1 = (instruction & 0x0e00)>>9;
+    baser = (instruction & 0x01c0) >>6;
+    off6 = (instruction & 0x003F);
+    if((instruction & 0x0020)){
+      off6 = off6 | 0xffc0;
+    }
+  }//rti instruction
   else if(opcode == 8){
-    
-  }
+    //do nothing
+  }//xor instruction
   else if(opcode == 9){
-    
-  }
+    dr = (instruction & 0x0e00) >> 9;
+    sr1 = (instruction & 0x01c0) >>6;
+    steering_bit = (instruction & 0x0020) >>5;
+    sr2 = instruction & 0x0007;
+    imm5 = instruction & 0x001f;
+    if(instruction & 0x0010){
+      imm5 = imm5 | 0xffe0;
+    }
+  }//not used
   else if(opcode == 10){
-    
-  }
+    //do nothing
+  }//not used
   else if(opcode == 11){
-    
-  }
+    //do nothing
+  }//jmp instruction
   else if(opcode == 12){
-    
-  }
+    baser = (instruction & 0x01c0)>>6;
+  }//shf instruction
   else if(opcode == 13){
-    
-  }
+    dr = (instruction & 0x0e00) >> 9;
+    sr1 = (instruction & 0x01c0) >>6;
+    steering_bit = (instruction & 0x0030)>>4;
+    amount4 = instruction & 0x000F;
+  }//lea
   else if(opcode == 14){
-    
+    baser = (instruction & 0x0e00)>>9;
+    off9 = (instruction & 0x01ff);
+    if(instruction & 0x0100){
+      off9 = off9 | 0xFE00;
+    }
   }
   else if(opcode == 15){
-    
-  }
+    trap_vector = instruction & 0x00FF;
+  }//branch instruction
   else if(opcode == 0){
-    
+    nzp_bits = (instruction & 0x0e00)>>9;
+    off9 = (instruction & 0x01ff);
+    if(instruction & 0x0100){
+      off9 = off9 | 0xFE00;
+    }
   }
 }
 void execute(int instruction){};
