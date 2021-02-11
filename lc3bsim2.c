@@ -561,7 +561,7 @@ void execute(int instruction){
     else NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] + sign_extend(imm5, 5);
   }// ldb
   else if(opcode == 2){
-    NEXT_LATCHES.REGS[dr] = MEMORY[(CURRENT_LATCHES.REGS[baser] + sign_extend(off6,6))/2][(CURRENT_LATCHES.REGS[baser] + sign_extend(off6,6))%2];
+    NEXT_LATCHES.REGS[dr] = MEMORY[(CURRENT_LATCHES.REGS[baser] + (sign_extend(off6,6)*2))/2][(CURRENT_LATCHES.REGS[baser] + (sign_extend(off6,6))*2)%2];
   }// stb
   else if(opcode == 3){
     MEMORY[(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))/2][(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))%2] = (CURRENT_LATCHES.REGS[sr1] & 0x00ff);
@@ -581,13 +581,15 @@ void execute(int instruction){
     else NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] & sign_extend(imm5, 5); 
   }// ldw
   else if(opcode == 6){
-    
+    NEXT_LATCHES.REGS[dr] = (MEMORY[(CURRENT_LATCHES.REGS[baser] + (sign_extend(off6,6))*2)/2][1]<<8)
+                            | (MEMORY[(CURRENT_LATCHES.REGS[baser] + (sign_extend(off6,6))*2)/2][0]);
   }// stw
   else if(opcode == 7){
-    
+    MEMORY[(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))/2][1] = (CURRENT_LATCHES.REGS[sr1] & 0x00ff);
+    MEMORY[(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))/2][0] = (CURRENT_LATCHES.REGS[sr1] & 0xff00);
   }// rti
   else if(opcode == 8){
-    
+    //do nothing
   }// not / xor
   else if(opcode == 9){
     if(!steering_bit){
@@ -596,19 +598,28 @@ void execute(int instruction){
     else NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] ^ sign_extend(imm5, 5);
   }// n/a 
   else if(opcode == 10){
-    
+    //do nothing
   }// n/a
   else if(opcode == 11){
-    
+    //do nothing
   }// ret
   else if(opcode == 12){
-    
+    NEXT_LATCHES.PC = CURRENT_LATCHES.REGS[7];
   }// shf
   else if(opcode == 13){
-    
+    if(steering_bit == 0){
+      NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] << amount4;
+    }
+    else if(steering_bit == 1){
+      NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] >> amount4;
+    }
+    else if(steering_bit == 3){
+      NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] >> amount4;
+      sign_extend(NEXT_LATCHES.REGS[dr], 16-amount4);
+    }
   }// lea
   else if(opcode == 14){
-    
+    NEXT_LATCHES.REGS[dr] = NEXT_LATCHES.PC + (sign_extend(off9, 9)<<1)
   }// trap
   else if(opcode == 15){
     
