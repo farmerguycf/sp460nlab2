@@ -425,6 +425,7 @@ void process_instruction(){
 
   // fetch 
   int instruction = MEMORY[CURRENT_LATCHES.PC/2][0] | (MEMORY[CURRENT_LATCHES.PC/2][1]<<8); 
+  NEXT_LATCHES.PC = CURRENT_LATCHES.PC +2;
   opcode = (instruction & 0xf000)>>12;
   decode(instruction);
   execute(instruction);
@@ -564,46 +565,51 @@ void execute(int instruction){
   }// stb
   else if(opcode == 3){
     MEMORY[(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))/2][(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))%2] = (CURRENT_LATCHES.REGS[sr1] & 0x00ff);
-  }
+  }// jsr / jsrr
   else if(opcode == 4){
-    
-  }
+    NEXT_LATCHES.REGS[7] = NEXT_LATCHES.PC;
+    if(!steering_bit){
+      NEXT_LATCHES.PC = CURRENT_LATCHES.REGS[baser];
+    }else{
+      NEXT_LATCHES.PC = NEXT_LATCHES.PC + (sign_extend(off11,11))<<1;
+    }
+  }// and 
   else if(opcode == 5){
     if(!steering_bit){
       NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] & CURRENT_LATCHES.REGS[sr2];
     }
     else NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] & sign_extend(imm5, 5); 
-  }
+  }// ldw
   else if(opcode == 6){
     
-  }
+  }// stw
   else if(opcode == 7){
     
-  }
+  }// rti
   else if(opcode == 8){
     
-  }
+  }// not / xor
   else if(opcode == 9){
     if(!steering_bit){
       NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] ^ CURRENT_LATCHES.REGS[sr2];
     }
     else NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] ^ sign_extend(imm5, 5);
-  }
+  }// n/a 
   else if(opcode == 10){
     
-  }
+  }// n/a
   else if(opcode == 11){
     
-  }
+  }// ret
   else if(opcode == 12){
     
-  }
+  }// shf
   else if(opcode == 13){
     
-  }
+  }// lea
   else if(opcode == 14){
     
-  }
+  }// trap
   else if(opcode == 15){
     
   }
