@@ -550,7 +550,7 @@ void execute(int instruction){
   if(opcode == 0){
     int nzp = (CURRENT_LATCHES.N<<2) | (CURRENT_LATCHES.Z<<1) | CURRENT_LATCHES.P;
     if(nzp == nzp_bits){
-      NEXT_LATCHES.PC = CURRENT_LATCHES.PC + (sign_extend(off9,9)<<1);
+      NEXT_LATCHES.PC = NEXT_LATCHES.PC + (sign_extend(off9,9)<<1);
     }
     else NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;
   } // add 
@@ -619,13 +619,72 @@ void execute(int instruction){
     }
   }// lea
   else if(opcode == 14){
-    NEXT_LATCHES.REGS[dr] = NEXT_LATCHES.PC + (sign_extend(off9, 9)<<1)
+    NEXT_LATCHES.REGS[dr] = NEXT_LATCHES.PC + (sign_extend(off9, 9)<<1);
   }// trap
   else if(opcode == 15){
-    
+    NEXT_LATCHES.REGS[7] = NEXT_LATCHES.PC;
+    NEXT_LATCHES.PC = MEMORY[trap_vector][1] << 8
+                      | MEMORY[trap_vector][0];
   }
-};
-void update(int instruction){};
+}
+void setCC(int num){
+  if(num > 0){
+    NEXT_LATCHES.P = 1;
+    NEXT_LATCHES.Z = 0;
+    NEXT_LATCHES.N = 0;
+  }
+  else if(num < 0){
+    NEXT_LATCHES.P = 0;
+    NEXT_LATCHES.Z = 0;
+    NEXT_LATCHES.N = 1;
+  }
+  else if(num == 0){
+    NEXT_LATCHES.P = 0;
+    NEXT_LATCHES.Z = 1;
+    NEXT_LATCHES.N = 0;
+  }
+}
+void update(int instruction){
+  if(opcode == 0){
+    
+  }else if(opcode == 1){
+    //set cc
+    setCC(NEXT_LATCHES.REGS[dr]);
+  }else if(opcode == 2){
+    //set cc
+    setCC(NEXT_LATCHES.REGS[dr]);
+  }else if(opcode == 3){
+    //do nothing
+  }else if(opcode == 4){
+    //do nothing
+  }else if(opcode == 5){
+    //set cc
+    setCC(NEXT_LATCHES.REGS[dr]);
+  }else if(opcode == 6){
+    //set cc
+    setCC(NEXT_LATCHES.REGS[dr]);
+  }else if(opcode == 7){
+    //do nothing
+  }else if(opcode == 8){
+    //do nothing
+  }else if(opcode == 9){
+    //set cc
+    setCC(NEXT_LATCHES.REGS[dr]);
+  }else if(opcode == 10){
+    //do nothing
+  }else if(opcode == 11){
+    //do nothing
+  }else if(opcode == 12){
+    //do nothing
+  }else if(opcode == 13){
+    //setcc
+    setCC(NEXT_LATCHES.REGS[dr]);
+  }else if(opcode == 14){
+    //do nothing
+  }else if(opcode == 15){
+    //do nothing
+  }
+}
 int sign_extend(int offset, int size){
   if(offset>>size){
     return offset | (0xffff<<(16-size));
