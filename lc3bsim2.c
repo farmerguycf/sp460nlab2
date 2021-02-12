@@ -442,9 +442,7 @@ void decode(int instruction){
     steering_bit = (instruction & 0x0020) >>5;
     sr2 = instruction & 0x0007;
     imm5 = instruction & 0x001f;
-    if(instruction & 0x0010){
-      imm5 = imm5 | 0xffe0;
-    }
+    imm5 = sign_extend(imm5, 5);
   }//ldb instruction
   else if(opcode == 2){
     dr = (instruction & 0x0e00)>>9;
@@ -690,8 +688,8 @@ void update(int instruction){
   }
 }
 int sign_extend(int offset, int size){
-  if(offset>>size){
-    return offset | (0xffff<<(16-size));
+  if(offset>>(size-1)){
+    return offset | (0xffffffff<<size);
   }
   else return offset;
 }
