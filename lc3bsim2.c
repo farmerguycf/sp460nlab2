@@ -608,7 +608,7 @@ void execute(int instruction){
     //do nothing
   }// ret
   else if(opcode == 12){
-    NEXT_LATCHES.PC = CURRENT_LATCHES.REGS[7];
+    NEXT_LATCHES.PC = CURRENT_LATCHES.REGS[baser];
   }// shf
   else if(opcode == 13){
     if(steering_bit == 0){
@@ -623,7 +623,7 @@ void execute(int instruction){
     }
   }// lea
   else if(opcode == 14){
-    NEXT_LATCHES.REGS[dr] = NEXT_LATCHES.PC + (sign_extend(off9, 9)<<1);
+    NEXT_LATCHES.REGS[baser] = NEXT_LATCHES.PC + (sign_extend(off9, 9)<<1);
   }// trap
   else if(opcode == 15){
     NEXT_LATCHES.REGS[7] = NEXT_LATCHES.PC;
