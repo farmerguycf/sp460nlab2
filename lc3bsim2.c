@@ -549,7 +549,11 @@ void execute(int instruction){
   // branch
   if(opcode == 0){
     int nzp = (CURRENT_LATCHES.N<<2) | (CURRENT_LATCHES.Z<<1) | CURRENT_LATCHES.P;
-    if(nzp == nzp_bits){
+    int n, z, p;
+    n = CURRENT_LATCHES.N<<2 & nzp_bits;
+    z = CURRENT_LATCHES.Z<<1 & nzp_bits;
+    p = CURRENT_LATCHES.P & nzp_bits;
+    if(nzp == nzp_bits || !nzp_bits){
       NEXT_LATCHES.PC = NEXT_LATCHES.PC + (sign_extend(off9,9)<<1);
     }
     else NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;
