@@ -553,7 +553,7 @@ void execute(int instruction){
     n = CURRENT_LATCHES.N<<2 & nzp_bits;
     z = CURRENT_LATCHES.Z<<1 & nzp_bits;
     p = CURRENT_LATCHES.P & nzp_bits;
-    if(nzp == nzp_bits || !nzp_bits){
+    if(n || z || p){
       NEXT_LATCHES.PC = NEXT_LATCHES.PC + (sign_extend(off9,9)<<1);
     }
     else NEXT_LATCHES.PC = CURRENT_LATCHES.PC + 2;
