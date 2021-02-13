@@ -476,9 +476,9 @@ void decode(int instruction){
     sr1 = (instruction & 0x01c0) >>6;
     steering_bit = (instruction & 0x0020) >>5;
     sr2 = instruction & 0x0007;
-    imm5 = instruction & 0x001f;
+    imm5 = sign_extend( instruction & 0x001f, 5);
     if(instruction & 0x0010){
-      imm5 = imm5 | 0xffe0;
+      imm5 = sign_extend( imm5 | 0xffe0,5);
     }
   }//ldw instruction
   else if(opcode == 6){
@@ -505,10 +505,7 @@ void decode(int instruction){
     sr1 = (instruction & 0x01c0) >>6;
     steering_bit = (instruction & 0x0020) >>5;
     sr2 = instruction & 0x0007;
-    imm5 = instruction & 0x001f;
-    if(instruction & 0x0010){
-      imm5 = imm5 | 0xffe0;
-    }
+    imm5 = sign_extend( instruction & 0x001f, 5);
   }//not used
   else if(opcode == 10){
     //do nothing
@@ -523,7 +520,7 @@ void decode(int instruction){
     dr = (instruction & 0x0e00) >> 9;
     sr1 = (instruction & 0x01c0) >>6;
     steering_bit = (instruction & 0x0030)>>4;
-    amount4 = instruction & 0x000F;
+    amount4 = Low16bits(instruction & 0x000F);
   }//lea
   else if(opcode == 14){
     baser = (instruction & 0x0e00)>>9;
@@ -558,12 +555,12 @@ void execute(int instruction){
   } // add 
   else if(opcode == 1){
     if(!steering_bit){
-      NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] + CURRENT_LATCHES.REGS[sr2];
+      NEXT_LATCHES.REGS[dr] = Low16bits(CURRENT_LATCHES.REGS[sr1] + CURRENT_LATCHES.REGS[sr2]);
     }
-    else NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] + sign_extend(imm5, 5);
+    else NEXT_LATCHES.REGS[dr] = Low16bits(CURRENT_LATCHES.REGS[sr1] + sign_extend(imm5, 5));
   }// ldb
   else if(opcode == 2){
-    NEXT_LATCHES.REGS[dr] = MEMORY[(CURRENT_LATCHES.REGS[baser] + (sign_extend(off6,6)*2))/2][(CURRENT_LATCHES.REGS[baser] + (sign_extend(off6,6))*2)%2];
+    NEXT_LATCHES.REGS[dr] = Low16bits(MEMORY[(CURRENT_LATCHES.REGS[baser] + (sign_extend(off6,6)*2))/2][(CURRENT_LATCHES.REGS[baser] + (sign_extend(off6,6))*2)%2]);
   }// stb
   else if(opcode == 3){
     MEMORY[(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))/2][(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))%2] = (CURRENT_LATCHES.REGS[sr1] & 0x00ff);
@@ -571,33 +568,33 @@ void execute(int instruction){
   else if(opcode == 4){
     NEXT_LATCHES.REGS[7] = NEXT_LATCHES.PC;
     if(!steering_bit){
-      NEXT_LATCHES.PC = CURRENT_LATCHES.REGS[baser];
+      NEXT_LATCHES.PC = Low16bits(CURRENT_LATCHES.REGS[baser]);
     }else{
-      NEXT_LATCHES.PC = NEXT_LATCHES.PC + (sign_extend(off11,11))<<1;
+      NEXT_LATCHES.PC = Low16bits(NEXT_LATCHES.PC + (sign_extend(off11,11))<<1);
     }
   }// and 
   else if(opcode == 5){
     if(!steering_bit){
-      NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] & CURRENT_LATCHES.REGS[sr2];
+      NEXT_LATCHES.REGS[dr] = Low16bits(CURRENT_LATCHES.REGS[sr1] & CURRENT_LATCHES.REGS[sr2]);
     }
-    else NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] & sign_extend(imm5, 5); 
+    else NEXT_LATCHES.REGS[dr] = Low16bits(CURRENT_LATCHES.REGS[sr1] & sign_extend(imm5, 5)); 
   }// ldw
   else if(opcode == 6){
-    NEXT_LATCHES.REGS[dr] = (MEMORY[(CURRENT_LATCHES.REGS[baser] + (sign_extend(off6,6))*2)/2][1]<<8)
-                            | (MEMORY[(CURRENT_LATCHES.REGS[baser] + (sign_extend(off6,6))*2)/2][0]);
+    NEXT_LATCHES.REGS[dr] = Low16bits((MEMORY[(CURRENT_LATCHES.REGS[baser] + (sign_extend(off6,6))*2)/2][1]<<8)
+                            | (MEMORY[(CURRENT_LATCHES.REGS[baser] + (sign_extend(off6,6))*2)/2][0]));
   }// stw
   else if(opcode == 7){
-    MEMORY[(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))/2][1] = (CURRENT_LATCHES.REGS[sr1] & 0x00ff);
-    MEMORY[(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))/2][0] = (CURRENT_LATCHES.REGS[sr1] & 0xff00);
+    MEMORY[(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))/2][1] = Low16bits((CURRENT_LATCHES.REGS[sr1] & 0x00ff));
+    MEMORY[(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))/2][0] = Low16bits((CURRENT_LATCHES.REGS[sr1] & 0xff00));
   }// rti
   else if(opcode == 8){
     //do nothing
   }// not / xor
   else if(opcode == 9){
     if(!steering_bit){
-      NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] ^ CURRENT_LATCHES.REGS[sr2];
+      NEXT_LATCHES.REGS[dr] = Low16bits(CURRENT_LATCHES.REGS[sr1] ^ CURRENT_LATCHES.REGS[sr2]);
     }
-    else NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] ^ sign_extend(imm5, 5);
+    else NEXT_LATCHES.REGS[dr] = Low16bits(CURRENT_LATCHES.REGS[sr1] ^ sign_extend(imm5, 5));
   }// n/a 
   else if(opcode == 10){
     //do nothing
@@ -606,14 +603,14 @@ void execute(int instruction){
     //do nothing
   }// ret
   else if(opcode == 12){
-    NEXT_LATCHES.PC = CURRENT_LATCHES.REGS[baser];
+    NEXT_LATCHES.PC = Low16bits(CURRENT_LATCHES.REGS[baser]);
   }// shf
   else if(opcode == 13){
     if(steering_bit == 0){
-      NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] << amount4;
+      NEXT_LATCHES.REGS[dr] = Low16bits(CURRENT_LATCHES.REGS[sr1] << amount4);
     }
     else if(steering_bit == 1){
-      NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] >> amount4;
+      NEXT_LATCHES.REGS[dr] = Low16bits(CURRENT_LATCHES.REGS[sr1] >> amount4);
     }
     else if(steering_bit == 3){
       NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] >> amount4;
@@ -621,21 +618,21 @@ void execute(int instruction){
     }
   }// lea
   else if(opcode == 14){
-    NEXT_LATCHES.REGS[baser] = NEXT_LATCHES.PC + (sign_extend(off9, 9)<<1);
+    NEXT_LATCHES.REGS[baser] = Low16bits(NEXT_LATCHES.PC + (sign_extend(off9, 9)<<1));
   }// trap
   else if(opcode == 15){
-    NEXT_LATCHES.REGS[7] = NEXT_LATCHES.PC;
-    NEXT_LATCHES.PC = MEMORY[trap_vector][1] << 8
-                      | MEMORY[trap_vector][0];
+    NEXT_LATCHES.REGS[7] = Low16bits(NEXT_LATCHES.PC);
+    NEXT_LATCHES.PC = Low16bits(MEMORY[trap_vector][1] << 8
+                      | MEMORY[trap_vector][0]);
   }
 }
 void setCC(int num){
-  if(num > 0){
+  if(num & 0x8000 == 0){
     NEXT_LATCHES.P = 1;
     NEXT_LATCHES.Z = 0;
     NEXT_LATCHES.N = 0;
   }
-  else if(num < 0){
+  else if(num & 0x8000){
     NEXT_LATCHES.P = 0;
     NEXT_LATCHES.Z = 0;
     NEXT_LATCHES.N = 1;
@@ -689,7 +686,7 @@ void update(int instruction){
 }
 int sign_extend(int offset, int size){
   if(offset>>(size-1)){
-    return offset | (0xffffffff<<size);
+    return Low16bits(offset | (0xffffffff<<size));
   }
-  else return offset;
+  else return Low16bits(offset);
 }
