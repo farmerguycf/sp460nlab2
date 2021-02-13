@@ -509,7 +509,7 @@ void decode(int instruction){
   }//not used
   else if(opcode == 10){
     //do nothing
-  }//not used
+  }//not usednum == 0){
   else if(opcode == 11){
     //do nothing
   }//jmp instruction
@@ -584,8 +584,8 @@ void execute(int instruction){
                             | (MEMORY[(CURRENT_LATCHES.REGS[baser] + (sign_extend(off6,6))*2)/2][0]));
   }// stw
   else if(opcode == 7){
-    MEMORY[(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))/2][1] = Low16bits((CURRENT_LATCHES.REGS[sr1] & 0x00ff));
-    MEMORY[(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))/2][0] = Low16bits((CURRENT_LATCHES.REGS[sr1] & 0xff00));
+    MEMORY[(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))/2][0] = Low16bits((CURRENT_LATCHES.REGS[sr1] & 0x00ff));
+    MEMORY[(CURRENT_LATCHES.REGS[baser]+ sign_extend(off6,6))/2][1] = Low16bits((CURRENT_LATCHES.REGS[sr1] & 0xff00)>>8);
   }// rti
   else if(opcode == 8){
     //do nothing
@@ -614,7 +614,7 @@ void execute(int instruction){
     }
     else if(steering_bit == 3){
       NEXT_LATCHES.REGS[dr] = CURRENT_LATCHES.REGS[sr1] >> amount4;
-      sign_extend(NEXT_LATCHES.REGS[dr], 16-amount4);
+      NEXT_LATCHES.REGS[dr] = sign_extend(NEXT_LATCHES.REGS[dr], 16-amount4);
     }
   }// lea
   else if(opcode == 14){
@@ -627,7 +627,7 @@ void execute(int instruction){
   }
 }
 void setCC(int num){
-  if(num & 0x8000 == 0){
+  if((num & 0x8000) == 0){
     NEXT_LATCHES.P = 1;
     NEXT_LATCHES.Z = 0;
     NEXT_LATCHES.N = 0;
